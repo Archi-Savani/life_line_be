@@ -60,8 +60,81 @@ const getVideos = async (_req, res) => {
   }
 };
 
+const updateVideo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const video = await Video.findById(id);
+    if (!video) {
+      return res.status(404).json({
+        success: false,
+        message: "Video not found.",
+      });
+    }
+
+    const { title, subtitle, videourl } = req.body;
+
+    if (title) video.title = title;
+    if (subtitle) video.subtitle = subtitle;
+    if (videourl) video.videourl = videourl;
+
+    const uploadedImage =
+      req.file ||
+      req.body.image ||
+      req.body.imageUrl ||
+      req.body.thumbnail;
+
+    if (uploadedImage) {
+      const imageUrl = await uploadImage(uploadedImage);
+      video.image = imageUrl;
+    }
+
+    await video.save();
+
+    return res.status(200).json({
+      success: true,
+      data: video,
+    });
+  } catch (error) {
+    console.error("Error updating video:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to update video.",
+      error: error.message,
+    });
+  }
+};
+
+const deleteVideo = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const video = await Video.findByIdAndDelete(id);
+    if (!video) {
+      return res.status(404).json({
+        success: false,
+        message: "Video not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Video deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error deleting video:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete video.",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   createVideo,
   getVideos,
+  updateVideo,
+  deleteVideo,
 };
 

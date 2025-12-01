@@ -46,8 +46,70 @@ const getGalleries = async (_req, res) => {
   }
 };
 
+const updateGallery = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const gallery = await Gallery.findById(id);
+    if (!gallery) {
+      return res.status(404).json({
+        success: false,
+        message: "Gallery item not found.",
+      });
+    }
+
+    let imageUrl = gallery.image;
+    if (req.file) {
+      imageUrl = await uploadImage(req.file.buffer);
+    } else if (req.body.image) {
+      imageUrl = req.body.image;
+    }
+
+    gallery.image = imageUrl;
+    await gallery.save();
+
+    return res.status(200).json({
+      success: true,
+      data: gallery,
+    });
+  } catch (error) {
+    console.error("Error updating gallery item:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to update gallery item.",
+    });
+  }
+};
+
+const deleteGallery = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const gallery = await Gallery.findByIdAndDelete(id);
+    if (!gallery) {
+      return res.status(404).json({
+        success: false,
+        message: "Gallery item not found.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Gallery item deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error deleting gallery item:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to delete gallery item.",
+    });
+  }
+};
+
 module.exports = {
   createGallery,
   getGalleries,
+  updateGallery,
+  deleteGallery,
 };
 
