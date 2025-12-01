@@ -1,73 +1,45 @@
 const Video = require("../models/videoModel");
-const { uploadImage } = require("../utils/upload");
-
-const requiredFields = ["title", "description", "duration", "category"];
-
-const normalizeTags = (rawTags) => {
-  if (!rawTags) return [];
-  if (Array.isArray(rawTags)) {
-    return rawTags.map((tag) => tag.trim()).filter(Boolean);
-  }
-
-  return rawTags
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-};
-
-const findMissingFields = (body) =>
-  requiredFields.filter((field) => {
-    if (field === "description") {
-      return !(body.description || body.dec || body.desc);
-    }
-    return !body[field];
-  });
-
-const extractDescription = (body) =>
-  body.description || body.dec || body.desc || "";
-
-const parseViews = (views) => {
-  if (views === undefined || views === null || views === "") {
-    return 0;
-  }
-  const parsed = Number(views);
-  return Number.isNaN(parsed) || parsed < 0 ? 0 : parsed;
-};
+const { uploadVideo, uploadImage } = require("../utils/upload");
 
 const createVideo = async (req, res) => {
   try {
-    const missingFields = findMissingFields(req.body);
-    if (missingFields.length) {
+    const { title, subtitle } = req.body;
+
+    if (!title || !subtitle) {
       return res.status(400).json({
         success: false,
-        message: `Missing required fields: ${missingFields.join(", ")}`,
+        message: "Title and subtitle are required.",
       });
     }
 
-    const uploadedImage = req.file || req.files?.image?.[0];
-    const imageInput =
-      uploadedImage ||
+    const uploadedVideo =
+      req.file || req.files?.video?.[0] || req.body.video || req.body.videoUrl;
+
+    if (!uploadedVideo) {
+      return res.status(400).json({
+        success: false,
+        message: "Video is required (file or URL).",
+      });
+    }
+
+    const videoUrl = await uploadVideo(uploadedVideo);
+
+    const uploadedImage =
+      req.files?.image?.[0] ||
       req.body.image ||
       req.body.imageUrl ||
       req.body.thumbnail;
 
-    if (!imageInput) {
-      return res.status(400).json({
-        success: false,
-        message: "Image is required (file or URL).",
-      });
+    let imageUrl;
+    if (uploadedImage) {
+      imageUrl = await uploadImage(uploadedImage);
     }
 
-    const imageUrl = await uploadImage(imageInput);
-
     const video = await Video.create({
-      title: req.body.title,
-      description: extractDescription(req.body),
-      image: imageUrl,
-      duration: req.body.duration,
-      category: req.body.category,
-      tags: normalizeTags(req.body.tags),
-      views: parseViews(req.body.views),
+      title,
+      subtitle,
+      video: videoUrl,
+      ...(imageUrl && { image: imageUrl }),
     });
 
     return res.status(201).json({

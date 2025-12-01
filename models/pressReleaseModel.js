@@ -7,34 +7,14 @@ const pressReleaseSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    content: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    author: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    publishDate: {
-      type: Date,
-      required: true,
-    },
     image: {
       type: String,
       required: true,
       trim: true,
     },
-    tags: {
-      type: [String],
-      default: [],
-    },
-    status: {
-      type: String,
-      enum: ["draft", "publish"],
-      default: "draft",
-      lowercase: true,
+    date: {
+      type: Date,
+      required: true,
     },
   },
   {
@@ -43,4 +23,5 @@ const pressReleaseSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("PressRelease", pressReleaseSchema);
+
 

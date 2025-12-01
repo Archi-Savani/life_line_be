@@ -23,6 +23,7 @@ app.use((req, res, next) => {
     next();
 });
 
+
 // Routes
 app.use("/api/contact", contactRoutes);
 app.use("/api/gallery", galleryRoutes);

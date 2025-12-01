@@ -7,35 +7,19 @@ const videoSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    description: {
+    subtitle: {
       type: String,
       required: true,
       trim: true,
     },
     image: {
       type: String,
-      required: true,
       trim: true,
     },
-    duration: {
+    video: {
       type: String,
       required: true,
       trim: true,
-    },
-    category: {
-      type: String,
-      required: true,
-      trim: true,
-      lowercase: true,
-    },
-    tags: {
-      type: [String],
-      default: [],
-    },
-    views: {
-      type: Number,
-      default: 0,
-      min: 0,
     },
   },
   {

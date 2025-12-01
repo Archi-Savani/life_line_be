@@ -1,24 +1,7 @@
 const PressRelease = require("../models/pressReleaseModel");
 const { uploadImage } = require("../utils/upload");
 
-const requiredFields = ["title", "content", "author", "publishDate"];
-
-const normalizeTags = (rawTags) => {
-  if (!rawTags) return [];
-  if (Array.isArray(rawTags)) {
-    return rawTags.map((tag) => tag.trim()).filter(Boolean);
-  }
-
-  return rawTags
-    .split(",")
-    .map((tag) => tag.trim())
-    .filter(Boolean);
-};
-
-const findMissingFields = (body) =>
-  requiredFields.filter((field) => !body[field]);
-
-const parsePublishDate = (value) => {
+const parseDate = (value) => {
   if (!value) return null;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
@@ -26,19 +9,18 @@ const parsePublishDate = (value) => {
 
 const createPressRelease = async (req, res) => {
   try {
-    const missingFields = findMissingFields(req.body);
-    if (missingFields.length) {
+    if (!req.body.title) {
       return res.status(400).json({
         success: false,
-        message: `Missing required fields: ${missingFields.join(", ")}`,
+        message: "Title is required.",
       });
     }
 
-    const parsedDate = parsePublishDate(req.body.publishDate);
+    const parsedDate = parseDate(req.body.date);
     if (!parsedDate) {
       return res.status(400).json({
         success: false,
-        message: "Invalid publishDate provided.",
+        message: "A valid date is required.",
       });
     }
 
@@ -56,12 +38,8 @@ const createPressRelease = async (req, res) => {
 
     const pressRelease = await PressRelease.create({
       title: req.body.title,
-      content: req.body.content,
-      author: req.body.author,
-      publishDate: parsedDate,
       image: imageUrl,
-      tags: normalizeTags(req.body.tags),
-      status: req.body.status?.toLowerCase() === "publish" ? "publish" : "draft",
+      date: parsedDate,
     });
 
     return res.status(201).json({
@@ -80,7 +58,7 @@ const createPressRelease = async (req, res) => {
 const getPressReleases = async (_req, res) => {
   try {
     const pressReleases = await PressRelease.find().sort({
-      publishDate: -1,
+      date: -1,
       createdAt: -1,
     });
     return res.status(200).json({
