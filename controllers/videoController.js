@@ -1,31 +1,19 @@
 const Video = require("../models/videoModel");
-const { uploadVideo, uploadImage } = require("../utils/upload");
+const { uploadImage } = require("../utils/upload");
 
 const createVideo = async (req, res) => {
   try {
-    const { title, subtitle } = req.body;
+    const { title, subtitle, videourl } = req.body;
 
-    if (!title || !subtitle) {
+    if (!title || !subtitle || !videourl) {
       return res.status(400).json({
         success: false,
-        message: "Title and subtitle are required.",
+        message: "Title, subtitle and videourl are required.",
       });
     }
-
-    const uploadedVideo =
-      req.file || req.files?.video?.[0] || req.body.video || req.body.videoUrl;
-
-    if (!uploadedVideo) {
-      return res.status(400).json({
-        success: false,
-        message: "Video is required (file or URL).",
-      });
-    }
-
-    const videoUrl = await uploadVideo(uploadedVideo);
 
     const uploadedImage =
-      req.files?.image?.[0] ||
+      req.file ||
       req.body.image ||
       req.body.imageUrl ||
       req.body.thumbnail;
@@ -38,7 +26,7 @@ const createVideo = async (req, res) => {
     const video = await Video.create({
       title,
       subtitle,
-      video: videoUrl,
+      videourl,
       ...(imageUrl && { image: imageUrl }),
     });
 
