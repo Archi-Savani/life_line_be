@@ -16,6 +16,10 @@ const pressReleaseSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+    link: {
+      type: String,
+      trim: true,
+    },
   },
   {
     timestamps: true,

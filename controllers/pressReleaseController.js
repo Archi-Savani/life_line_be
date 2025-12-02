@@ -40,6 +40,7 @@ const createPressRelease = async (req, res) => {
       title: req.body.title,
       image: imageUrl,
       date: parsedDate,
+      link: req.body.link,
     });
 
     return res.status(201).json({
@@ -109,6 +110,10 @@ const updatePressRelease = async (req, res) => {
         imageUrl = req.body.image;
       }
       pressRelease.image = imageUrl;
+    }
+
+    if (typeof req.body.link !== "undefined") {
+      pressRelease.link = req.body.link;
     }
 
     await pressRelease.save();
