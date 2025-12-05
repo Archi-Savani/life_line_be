@@ -9,6 +9,7 @@ const pressReleaseRoutes = require("./routers/pressReleaseRoutes");
 const videoRoutes = require("./routers/videoRoutes");
 const sliderRoutes = require("./routers/sliderRoutes");
 const personalDetailRoutes = require("./routers/personalDetailRoutes");
+const categoryRoutes = require("./routers/categoryRoutes");
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use("/api/press-release", pressReleaseRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/slider", sliderRoutes);
 app.use("/api/personal-detail", personalDetailRoutes);
+app.use("/api/category", categoryRoutes);
 
 const connectDB = async () => {
     try {
