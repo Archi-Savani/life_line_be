@@ -27,3 +27,4 @@ const personalDetailSchema = new mongoose.Schema(
 module.exports = mongoose.model("PersonalDetail", personalDetailSchema);
 
 
+

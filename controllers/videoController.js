@@ -131,9 +131,36 @@ const deleteVideo = async (req, res) => {
   }
 };
 
+// Get meta (lastUpdated only) for Video entries
+const getVideosMeta = async (_req, res) => {
+  try {
+    const videos = await Video.find().sort({ updatedAt: -1 }).limit(1);
+    
+    let lastUpdated = new Date().toISOString();
+    if (videos.length > 0 && videos[0].updatedAt) {
+      lastUpdated = videos[0].updatedAt.toISOString();
+    }
+    
+    if (res.metaResponse) {
+      return res.metaResponse(lastUpdated);
+    }
+    
+    return res.status(200).json({
+      lastUpdated: lastUpdated,
+    });
+  } catch (error) {
+    console.error("Error fetching video meta:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch video meta.",
+    });
+  }
+};
+
 module.exports = {
   createVideo,
   getVideos,
+  getVideosMeta,
   updateVideo,
   deleteVideo,
 };

@@ -16,3 +16,4 @@ router.delete("/:id", deletePersonalDetail);
 module.exports = router;
 
 
+

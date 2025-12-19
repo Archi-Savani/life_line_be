@@ -156,9 +156,38 @@ const deletePressRelease = async (req, res) => {
   }
 };
 
+// Get meta (lastUpdated only) for Press Release entries
+const getPressReleasesMeta = async (_req, res) => {
+  try {
+    const pressReleases = await PressRelease.find()
+      .sort({ updatedAt: -1 })
+      .limit(1);
+    
+    let lastUpdated = new Date().toISOString();
+    if (pressReleases.length > 0 && pressReleases[0].updatedAt) {
+      lastUpdated = pressReleases[0].updatedAt.toISOString();
+    }
+    
+    if (res.metaResponse) {
+      return res.metaResponse(lastUpdated);
+    }
+    
+    return res.status(200).json({
+      lastUpdated: lastUpdated,
+    });
+  } catch (error) {
+    console.error("Error fetching press release meta:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch press release meta.",
+    });
+  }
+};
+
 module.exports = {
   createPressRelease,
   getPressReleases,
+  getPressReleasesMeta,
   updatePressRelease,
   deletePressRelease,
 };

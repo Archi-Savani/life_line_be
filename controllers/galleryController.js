@@ -234,9 +234,43 @@ const deleteGallery = async (req, res) => {
   }
 };
 
+// Get meta (lastUpdated only) for Gallery entries
+const getGalleriesMeta = async (req, res) => {
+  try {
+    const query = {};
+    if (req.query.category) {
+      query.category = req.query.category;
+    }
+    
+    const galleries = await Gallery.find(query)
+      .sort({ updatedAt: -1 })
+      .limit(1);
+    
+    let lastUpdated = new Date().toISOString();
+    if (galleries.length > 0 && galleries[0].updatedAt) {
+      lastUpdated = galleries[0].updatedAt.toISOString();
+    }
+    
+    if (res.metaResponse) {
+      return res.metaResponse(lastUpdated);
+    }
+    
+    return res.status(200).json({
+      lastUpdated: lastUpdated,
+    });
+  } catch (error) {
+    console.error("Error fetching gallery meta:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch gallery meta.",
+    });
+  }
+};
+
 module.exports = {
   createGallery,
   getGalleries,
+  getGalleriesMeta,
   getGalleriesByCategory,
   getGalleriesByCategoryId,
   updateGallery,

@@ -130,11 +130,39 @@ const deleteAbout = async (req, res) => {
   }
 };
 
+// Get meta (lastUpdated only) for About entries
+const getAboutsMeta = async (_req, res) => {
+  try {
+    const abouts = await About.find().sort({ updatedAt: -1 }).limit(1);
+    
+    let lastUpdated = new Date().toISOString();
+    if (abouts.length > 0 && abouts[0].updatedAt) {
+      lastUpdated = abouts[0].updatedAt.toISOString();
+    }
+    
+    if (res.metaResponse) {
+      return res.metaResponse(lastUpdated);
+    }
+    
+    return res.status(200).json({
+      lastUpdated: lastUpdated,
+    });
+  } catch (error) {
+    console.error("Error fetching about meta:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch about meta.",
+    });
+  }
+};
+
 module.exports = {
   createAbout,
   getAbouts,
+  getAboutsMeta,
   updateAbout,
   deleteAbout,
 };
+
 
 

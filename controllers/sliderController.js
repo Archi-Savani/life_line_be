@@ -112,11 +112,39 @@ const deleteSlider = async (req, res) => {
   }
 };
 
+// Get meta (lastUpdated only) for Slider entries
+const getSlidersMeta = async (_req, res) => {
+  try {
+    const sliders = await Slider.find().sort({ updatedAt: -1 }).limit(1);
+    
+    let lastUpdated = new Date().toISOString();
+    if (sliders.length > 0 && sliders[0].updatedAt) {
+      lastUpdated = sliders[0].updatedAt.toISOString();
+    }
+    
+    if (res.metaResponse) {
+      return res.metaResponse(lastUpdated);
+    }
+    
+    return res.status(200).json({
+      lastUpdated: lastUpdated,
+    });
+  } catch (error) {
+    console.error("Error fetching slider meta:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to fetch slider meta.",
+    });
+  }
+};
+
 module.exports = {
   createSlider,
   getSliders,
+  getSlidersMeta,
   updateSlider,
   deleteSlider,
 };
+
 
 
